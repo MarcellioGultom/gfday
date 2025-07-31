@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Dearest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- Tone.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #a0c4ff; /* Pastel Blue */
+            
+            /* -- Background Images -- */
+            background-image: 
+                url('images/character_white_dress.jpg'), /* Top Left */
+                url('images/character_blue_shirt.jpg'), /* Top Right */
+                url('images/photo-book-icon.png'),      /* Bottom Left */
+                url('images/mail-icon.png'),            /* Bottom Right */
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, #a0c4ff 1px);
+            
+            background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+            background-position: top 1rem left 1rem, top 1rem right 1rem, bottom 1rem left 1rem, bottom 1rem right 1rem, 0 0, 20px 20px;
+            background-size: 200px, 200px, 200px, 200px, 40px 40px, 40px 40px;
+            background-attachment: fixed;
+
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        /* -- Start Screen Styles -- */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #a0c4ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.8s ease-out, visibility 0.8s;
+        }
+
+        #start-screen h1 {
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: 4px 4px 0px #333;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        #start-button {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #ffffc2;
+            border: 4px solid #333;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 6px 6px 0px #333;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        #start-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0px #333;
+        }
+
+
+        .pixel-window {
+            background-color: #fdc5f5; /* Pastel Pink */
+            border: 4px solid #333;
+            box-shadow: 8px 8px 0px #333;
+            position: absolute;
+            display: none;
+            resize: both;
+            overflow: auto;
+            min-width: 280px;
+            width: 500px;
+            max-width: 90vw;
+            max-height: 85vh;
+            font-size: 0.9rem;
+        }
+
+        .window-header {
+            background-color: #b9f2d0; /* Pastel Green */
+            padding: 8px;
+            border-bottom: 4px solid #333;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .window-title {
+            font-weight: bold;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .close-button {
+            background-color: #ff6961; /* Pastel Red */
+            border: 2px solid #333;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .close-button:hover {
+            background-color: #ff4136;
+        }
+
+        .window-content {
+            padding: 1rem;
+            max-height: calc(85vh - 50px);
+            overflow-y: auto;
+        }
+        
+        .window-content::-webkit-scrollbar {
+            width: 16px;
+        }
+        .window-content::-webkit-scrollbar-track {
+            background: #fdc5f5;
+        }
+        .window-content::-webkit-scrollbar-thumb {
+            background-color: #b9f2d0;
+            border: 3px solid #333;
+        }
+
+        .desktop-icon {
+            cursor: pointer;
+            text-align: center;
+            width: 120px;
+            padding: 0.5rem;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .desktop-icon:hover {
+            transform: translateY(-5px);
+        }
+        .desktop-icon img {
+            width: 56px;
+            height: 56px;
+        }
+        .desktop-icon span {
+            font-size: 0.7rem;
+            line-height: 1.3;
+        }
+
+        .tab-button {
+            background-color: #ffffc2; /* Pastel Yellow */
+            border: 2px solid #333;
+            padding: 0.4rem 0.8rem;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        .tab-button.active {
+            background-color: #b9f2d0;
+            border-bottom: 2px solid #b9f2d0;
+        }
+        
+        .letter-category {
+            margin-top: 1rem;
+        }
+        
+        .letter-button {
+            background-color: #ffb7c5; /* Light Pink */
+            border: 2px solid #333;
+            padding: 0.5rem;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .letter-button:hover {
+            background-color: #ffa9b9;
+        }
+        
+        #letter-display {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 0.85rem;
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjusted min-width for better fit */
+            gap: 1rem;
+        }
+        .photo-item {
+            border: 4px solid #333;
+            background-color: white;
+            padding: 8px;
+            box-shadow: 4px 4px 0 #999;
+        }
+        .photo-item img {
+            width: 100%;
+            display: block;
+            /* -- 9:16 Aspect Ratio Added -- */
+            aspect-ratio: 9 / 16;
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+        }
+        .photo-item p {
+            font-size: 0.65rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        #main-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 4px solid #333;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
+            z-index: 5;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease-in;
+        }
+        
+        .cat {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-image: url('images/kitty.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            animation: fall 10s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes fall {
+            0% { top: -50px; transform: rotate(0deg); }
+            100% { top: 100vh; transform: rotate(360deg); }
+        }
+
+        .playlist-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.5rem;
+            padding: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: #b9f2d0 #fdc5f5;
+        }
+        .playlist-container::-webkit-scrollbar {
+            height: 12px;
+        }
+        .playlist-container::-webkit-scrollbar-track {
+            background: #fdc5f5;
+        }
+        .playlist-container::-webkit-scrollbar-thumb {
+            background-color: #b9f2d0;
+            border: 3px solid #333;
+        }
+        .song-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            width: 300px;
+            flex-shrink: 0;
+        }
+        .song-item iframe {
+            width: 100%;
+        }
+        .song-description {
+            font-size: 0.7rem;
+            text-align: center;
+            line-height: 1.4;
+            width: 100%;
+            padding: 0 0.5rem;
+        }
+
+
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                padding-top: 2rem;
+                background-size: 100px, 100px, 100px, 100px, 40px 40px, 40px 40px;
+                background-position: top 0.5rem left 0.5rem, top 0.5rem right 0.5rem, bottom 0.5rem left 0.5rem, bottom 0.5rem right 0.5rem, 0 0, 20px 20px;
+            }
+            #start-screen h1 {
+                font-size: 1.8rem;
+            }
+            #main-container {
+                flex-direction: row;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+            .desktop-icon {
+                width: 90px;
+            }
+            .desktop-icon img {
+                width: 48px;
+                height: 48px;
+            }
+            .desktop-icon span {
+                font-size: 0.6rem;
+            }
+            .pixel-window {
+                width: 95vw;
+                left: 2.5vw !important;
+                top: 5% !important;
+                max-height: 80vh;
+            }
+            .tabs {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+            .tab-button {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+     <!-- Background music audio element -->
+    <!-- Place your MP3 file in a 'music' folder -->
+    <audio class="background-music" loop autoplay>
+        <source src="music/bg-music.mp3" type="audio/mpeg">
+        </source>
+        Your browser does not support the audio element.
+    </audio>
+
+    <div id="start-screen">
+        <h1>HELLOOWW MY BUBUBBB</h1>
+        <button id="start-button">PRESS TO START</button>
+    </div>
+
+    <div id="main-container">
+        <div class="desktop-icon" onclick="openWindowWithSound('photos')">
+            <img src="images/photo-book.png" alt="Photo Album Icon">
+            <span>THE MOST PRETTY GIRL EVERRR.exe</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindowWithSound('letters')">
+            <img src="images/mail.png" alt="Letters Icon">
+            <span>daily letters.exe</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindowWithSound('music')">
+            <img src="images/music.png" alt="Music Icon">
+            <span>music that made for youu.mp3</span>
+        </div>
+    </div>
+
+    <!-- Photos Window -->
+    <div id="photos-window" class="pixel-window">
+        <div class="window-header">
+            <span class="window-title">[+] my favorite person</span>
+            <div class="close-button" onclick="closeWindowWithSound('photos')">X</div>
+        </div>
+        <div class="window-content">
+            <p class="mb-4 text-sm">a collection of my favorite pictures of you...</p>
+            <div class="photo-gallery">
+                <div class="photo-item">
+                    <img src="images/photo1.jpg" alt="A lovely photo">
+                    <p>the first photo i took secretly</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo2.jpg" alt="A lovely photo">
+                    <p>new blush on yeayyy</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo3.jpg" alt="A lovely photo">
+                    <p>imup ckali</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo4.jpg" alt="A lovely photo">
+                    <p>cakep bgt bused (smw pto u cakep)</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo5.jpg" alt="A lovely photo">
+                    <p>RAHHHH TOP 1 MOST PRETTY GF</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo6.jpg" alt="A lovely photo">
+                    <p>cutiee</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo7.jpg" alt="A lovely photo">
+                    <p>KNP YH ADA MANUSYA SE CANGTIP ENIHH???</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo8.jpg" alt="A lovely photo">
+                    <p>i loveee youu moree than a lott bububbb</p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo9.jpg" alt="A lovely photo">
+                    <p>tiap liat kamu bikin aku cengar cengir sampe cengengesan buseddd </p>
+                </div>
+                <div class="photo-item">
+                    <img src="images/photo10.jpg" alt="A lovely photo">
+                    <p>LUCUUUNYOOO</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Letters Window -->
+    <div id="letters-window" class="pixel-window">
+        <div class="window-header">
+            <span class="window-title">[+] letters for my loveee</span>
+            <div class="close-button" onclick="closeWindowWithSound('letters')">X</div>
+        </div>
+        <div class="window-content">
+            <div class="tabs flex border-b-4 border-black flex-wrap">
+                <button class="tab-button active" onclick="openDayWithSound(event, 'Monday')">Mon</button>
+                <button class="tab-button" onclick="openDayWithSound(event, 'Tuesday')">Tue</button>
+                <button class="tab-button" onclick="openDayWithSound(event, 'Wednesday')">Wed</button>
+                <button class="tab-button" onclick="openDayWithSound(event, 'Thursday')">Thu</button>
+                <button class="tab-button" onclick="openDayWithSound(event, 'Friday')">Fri</button>
+                <button class="tab-button" onclick="openDayWithSound(event, 'Saturday')">Sat</button>
+                <button class="tab-button" onclick="openDayWithSound(event, 'Sunday')">Sun</button>
+            </div>
+
+            <div id="letter-display" class="mt-4 p-4 bg-white/70 border-2 border-dashed border-black min-h-[150px]">
+                select a letter to read yaa hehehe...
+            </div>
+            
+            <!-- Letter Content for Each Day -->
+            <div id="Monday" class="day-content">
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="monday-love">You are my everything</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="monday-you">Your amazing mind</button>
+                </div>
+            </div>
+            <div id="Tuesday" class="day-content" style="display:none;">
+                 <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="tuesday-love">My world is better with you</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="tuesday-you">That smile of yours</button>
+                </div>
+            </div>
+            <div id="Wednesday" class="day-content" style="display:none;">
+                 <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="wednesday-love">My first real love</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="wednesday-you">Your incredible humor</button>
+                </div>
+            </div>
+            <div id="Thursday" class="day-content" style="display:none;">
+                 <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="thursday-love">Every moment is precious</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="thursday-you">You are so adorable</button>
+                </div>
+            </div>
+            <div id="Friday" class="day-content" style="display:none;">
+                 <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="friday-love">Thank you for being you</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="friday-you">The prettiest girl ever</button>
+                </div>
+            </div>
+            <div id="Saturday" class="day-content" style="display:none;">
+                 <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="saturday-love">My partner in crime</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="saturday-you">Your caring heart</button>
+                </div>
+            </div>
+            <div id="Sunday" class="day-content" style="display:none;">
+                 <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ Love ~</h3>
+                    <button class="letter-button" data-letter="sunday-love">Looking forward to our future</button>
+                </div>
+                <div class="letter-category">
+                    <h3 class="text-lg mb-2">~ You ~</h3>
+                    <button class="letter-button" data-letter="sunday-you">All the little things</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Music Window -->
+    <div id="music-window" class="pixel-window">
+        <div class="window-header">
+            <span class="window-title">[+] made for youuu</span>
+            <div class="close-button" onclick="closeWindowWithSound('music')">X</div>
+        </div>
+        <div class="window-content">
+            <p class="mb-4 text-sm">a few songs that were made for you...</p>
+            <button id="mute-bg-music-btn" class="tab-button mb-4">mute background music (click this)</button>
+            <div class="playlist-container">
+                <div class="song-item">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4cHoEtaGdRp4b0yUiQjUx5?utm_source=generator" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="song-description">LITERALLY YOUUU, JUST YOUUU</p>
+                </div>
+                <div class="song-item">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3NlLmKBJozwoi0k03Feb1N?utm_source=generator" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="song-description">enihh lagu buat kamu bangettt</p>
+                </div>
+                <div class="song-item">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4oZKyVTuQwKAXlplVagooE?utm_source=generator" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="song-description">my feelings when i see you bububbb</p>
+                </div>
+                <div class="song-item">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/2Cakl6tRkLxccrnqJdvGpu?utm_source=generator" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="song-description">this always makes me think to doing things only with you cihuyyy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Sound Engine (Tone.js) ---
+        let soundsReady = false;
+
+        const clickSound = new Tone.Synth({
+            oscillator: { type: 'triangle' },
+            envelope: { attack: 0.01, decay: 0.1, sustain: 0.01, release: 0.1 }
+        }).toDestination();
+
+        function playClickSound() {
+            if (soundsReady) {
+                clickSound.triggerAttackRelease('C6', '16n');
+            }
+        }
+
+        // --- Start Screen Logic ---
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const mainContainer = document.getElementById('main-container');
+        const backgroundMusic = document.querySelector('.background-music');
+
+        startButton.addEventListener('click', async () => {
+            if (backgroundMusic) {
+                backgroundMusic.play();
+            }
+            if (!soundsReady) {
+                await Tone.start();
+                soundsReady = true;
+                console.log('Audio is ready!');
+                Tone.Transport.start();
+            }
+            playClickSound();
+
+            startScreen.style.opacity = '0';
+            startScreen.style.visibility = 'hidden';
+            mainContainer.style.opacity = '1';
+            mainContainer.style.visibility = 'visible';
+        });
+
+        // --- Draggable Windows Logic ---
+        let windows = document.querySelectorAll('.pixel-window');
+        windows.forEach(makeDraggable);
+
+        function makeDraggable(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            const header = elmnt.querySelector(".window-header");
+            if (header) {
+                header.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                
+                document.querySelectorAll('.pixel-window').forEach(w => w.style.zIndex = '10');
+                elmnt.style.zIndex = '20';
+
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+         // --- NEW Mute Button Logic ---
+        const muteBtn = document.getElementById('mute-bg-music-btn');
+        muteBtn.addEventListener('click', () => {
+            playClickSound();
+            if (backgroundMusic.muted) {
+                backgroundMusic.muted = false;
+                muteBtn.textContent = 'mute background music when u play this song';
+                muteBtn.classList.remove('active');
+            } else {
+                backgroundMusic.muted = true;
+                muteBtn.textContent = 'unmute background music';
+                muteBtn.classList.add('active');
+            }
+        });
+
+        // --- Window Management with Smart Sound ---
+        function openWindowWithSound(id) {
+            playClickSound();
+            if (id === 'music' && soundsReady) {
+                Tone.Transport.pause();
+            }
+            const windowEl = document.getElementById(id + '-window');
+            windowEl.style.display = 'block';
+            document.querySelectorAll('.pixel-window').forEach(w => w.style.zIndex = '10');
+            windowEl.style.zIndex = '20';
+        }
+
+        function closeWindowWithSound(id) {
+            playClickSound();
+            if (id === 'music' && soundsReady) {
+                Tone.Transport.start();
+            }
+            document.getElementById(id + '-window').style.display = 'none';
+        }
+        
+        // Initial window positions
+        document.getElementById('photos-window').style.top = '20%';
+        document.getElementById('photos-window').style.left = '10%';
+        document.getElementById('letters-window').style.top = '15%';
+        document.getElementById('letters-window').style.left = '35%';
+        document.getElementById('music-window').style.top = '50%';
+        document.getElementById('music-window').style.left = '25%';
+
+
+        // --- Letters Tab Logic with Sound ---
+        function openDayWithSound(evt, dayName) {
+            playClickSound();
+            let i, daycontent, tabbuttons;
+            daycontent = document.getElementsByClassName("day-content");
+            for (i = 0; i < daycontent.length; i++) {
+                daycontent[i].style.display = "none";
+            }
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+            }
+            document.getElementById(dayName).style.display = "block";
+            evt.currentTarget.className += " active";
+            document.getElementById('letter-display').innerHTML = 'Select a letter to read...';
+        }
+        
+        // --- Letter Content ---
+        const letters = {
+            'monday-love': "to the one who made me understand love for the first time. every experience with you is a 'first' that I'll treasure forever. you're so precious to me, and I can't wait to create more beautiful memories together",
+            'monday-you': "you are a caring person, you know how to make me calm with all the thoughts I have. you have this amazing mind that understands me like no one else. i love you so much for that",
+            'tuesday-love': "my life was soooo boringgg before you came to my life, like you make my life very brightful. thank you for making my world so vibrant and full of joy. i can't imagine a day without u bububbb",
+            'tuesday-you': "your smile... it's the most beautiful thing I've ever seen. it genuinely lights up my day and makes everything feel right in the world",
+            'wednesday-love': "i never knew what it felt like to be loved so completely until you. you love me for me, and that's the greatest gift I've ever received",
+            'wednesday-you': "you can always make me laugh. just by looking at you i can giggle like crazy, i really love you",
+            'thursday-love': "being with you feels like home. it's a feeling of comfort, safety, and pure happiness. every moment, big or small, is special because i'm sharing it with you",
+            'thursday-you': "you are just so incredibly cute. like everything you do is adorable to me, i just can't help but smile when i think about you",
+            'friday-love': "thank you for your patience, your kindness, and your unwavering support. you make me want to be a better person every single day",
+            'friday-you': "let me say it again you are the most beautiful woman in the world, inside and out. your beauty is timeless and it captivates me completely",
+            'saturday-love': "you're more than my girlfriend, you're my best friend and my partner in everything. there's no one else i'd rather go on adventures with",
+            'saturday-you': "you have such a kind and caring heart. the way you treat me... it's a testament to the beautiful person you are bububbb",
+            'sunday-love': "HAPPY SUNDAYY BUBUBB!!! you know, thinking about our future together fills me with so much excitement. i can't wait to make another experience with you, full of love, laughter, and happiness. i know that whatever comes our way, we'll face it together, hand in hand",
+            'sunday-you': "HAPPY SUNDAYY AGAINNN, MAY GOD ALWAYS BE WITH YOUU MY LOVEE!! it's all the little things you do. the way you remember details for me, the way you do for me... they all add up to this one big thing like YOU ARE THE PERFECT FOR ME BUBUBB!!"
+        };
+
+        const letterDisplay = document.getElementById('letter-display');
+        document.querySelectorAll('.letter-button').forEach(button => {
+            button.addEventListener('click', () => {
+                playClickSound();
+                const letterKey = button.getAttribute('data-letter');
+                if (letters[letterKey]) {
+                    letterDisplay.innerHTML = '';
+                    typeWriter(letters[letterKey], letterDisplay);
+                }
+            });
+        });
+        
+        let typeTimeout;
+        function typeWriter(txt, element) {
+            clearTimeout(typeTimeout);
+            let i = 0;
+            element.innerHTML = '';
+            function type() {
+                if (i < txt.length) {
+                    element.innerHTML += txt.charAt(i);
+                    i++;
+                    typeTimeout = setTimeout(type, 30);
+                }
+            }
+            type();
+        }
+        
+        // --- Falling Cats Animation ---
+        function createCat() {
+            const cat = document.createElement('div');
+            cat.classList.add('cat');
+            cat.style.left = Math.random() * 100 + 'vw';
+            cat.style.animationDuration = Math.random() * 5 + 8 + 's';
+            cat.style.opacity = Math.random() * 0.5 + 0.5;
+            document.body.appendChild(cat);
+
+            setTimeout(() => {
+                cat.remove();
+            }, 13000);
+        }
+
+        setInterval(createCat, 1500);
+
+    </script>
+</body>
+</html>
